@@ -3,6 +3,8 @@
 #include <cstdlib>
 #include <ctime>
 #include <vector>
+#include <SDL_mixer.h>
+#include <cstring>
 
 using namespace std;
 
@@ -77,10 +79,10 @@ void randomfood(SDL_Rect & food) {
     food.w = 40;
     food.h = 40;
 }
-bool update(vector <SDL_Rect>& snake, const int td, const int x) {
+bool update(vector <SDL_Rect>& snake, const int td, const int dd) {
     for (int i = snake.size() - 1; i > 0; i--) {
-        if (td == 1 && snake[i].x == x && snake[i].y == snake[0].y) return false;
-        if (td == 2 && snake[i].y == x && snake[i].x == snake[0].x) return false;
+        if (td == 1 && snake[i].x == dd && snake[i].y == snake[0].y) return false;
+        if (td == 2 && snake[i].y == dd && snake[i].x == snake[0].x) return false;
         snake[i] = snake[i - 1];
     }
     return true;
@@ -95,6 +97,17 @@ int main(int argc, char* argv[])
     SDL_Rect food,hcn;
     randomfood(food);
     vector <SDL_Rect> snake;
+    if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) == -1)
+    {
+        cout << "Error";
+    }
+    Mix_Music* music = NULL;
+    Mix_Music* modau = NULL;
+    Mix_Music* ketngan = NULL;
+    ketngan = Mix_LoadMUS("ketngan.mp3");
+    modau = Mix_LoadMUS("modau.mp3");
+    music = Mix_LoadMUS("music.mp3");
+    Mix_PlayMusic(modau, 1);
     hcn.x = 0;
     hcn.y = 0;
     hcn.w = 40;
@@ -106,17 +119,40 @@ int main(int argc, char* argv[])
     // Your drawing code here
     // use SDL_RenderPresent(renderer) to show it
     SDL_Event e;
+    int nho = 2, dem = 0,test =0;
     while (true) {
-        //SDL_Delay(0);
+        SDL_Delay(100);
+        test++;
+        cout << test << endl;
 
         // Nếu không có sự kiện gì thì tiếp tục trở về đầu vòng lặp
-        if (SDL_WaitEvent(&e) == 0) continue;
-
-        // Nếu sự kiện là kết thúc (như đóng cửa sổ) thì thoát khỏi vòng lặp
+        
+                    // Nếu sự kiện là kết thúc (như đóng cửa sổ) thì thoát khỏi vòng lặp
+        switch (nho) {
+        case 1:
+            update(snake, 1, (snake[0].x - step + SCREEN_WIDTH) % SCREEN_WIDTH);
+            snake[0].x= (snake[0].x - step + SCREEN_WIDTH) % SCREEN_WIDTH;
+            break;
+        case 2:
+            update(snake, 1, (snake[0].x + step ) % SCREEN_WIDTH);
+            snake[0].x = (snake[0].x + step + SCREEN_WIDTH) % SCREEN_WIDTH;
+            break;
+        case 3:
+            update(snake, 2, (snake[0].y + step + SCREEN_WIDTH) % SCREEN_WIDTH);
+            snake[0].y = (snake[0].y + step + SCREEN_WIDTH) % SCREEN_WIDTH;
+            break;
+        case 4:
+            update(snake, 2, (snake[0].y - step + SCREEN_WIDTH) % SCREEN_WIDTH);
+            snake[0].y = (snake[0].y - step + SCREEN_WIDTH) % SCREEN_WIDTH;
+            break;
+        default: break;
+        }
+        refreshScreen(renderer, snake, food);
+        if (SDL_WaitEvent(&e)== 1) continue;
+        cout << "Fuck you " << endl;
         if (e.type == SDL_QUIT) break;
         // Nếu có một phím được nhấn, thì xét phím đó là gì để xử lý tiếp
         hcn = snake[snake.size() - 1];
-        cout << snake.size() << endl;
         if (e.type == SDL_KEYDOWN) {
             switch (e.key.keysym.sym) {
             case SDLK_ESCAPE: break; // Nếu nhấn phìm ESC thì thoát khỏi vòng lặp
@@ -125,39 +161,64 @@ int main(int argc, char* argv[])
             case SDLK_LEFT: 
                 if (update(snake,1, (snake[0].x + SCREEN_WIDTH - step) % SCREEN_WIDTH));
                 else {
+                    Mix_Music* ketbai = Mix_LoadMUS("ketbai.mp3");
+                    Mix_PlayMusic(ketbai, 1);
+                    SDL_Delay(3000);
+                    Mix_CloseAudio();
                     quitSDL(window, renderer);
                     return 0;
                 }
+                nho = 1;
                 snake[0].x = (snake[0].x + SCREEN_WIDTH - step) % SCREEN_WIDTH;
                 break;
                 // Tương tự với dịch phải, xuống và lên
             case SDLK_RIGHT: 
                 if (update(snake,1, (snake[0].x + step) % SCREEN_WIDTH));
                 else {
+                    Mix_Music* ketbai = Mix_LoadMUS("ketbai.mp3");
+                    Mix_PlayMusic(ketbai, 1);
+                    SDL_Delay(3000);
+                    Mix_CloseAudio();
                     quitSDL(window, renderer);
                     return 0;
                 }
+                nho = 2;
                 snake[0].x = (snake[0].x + step) % SCREEN_WIDTH; 
                 break;
             case SDLK_DOWN:
                 if (update(snake,2, (snake[0].y + step) % SCREEN_HEIGHT));
                 else {
+                    Mix_Music* ketbai = Mix_LoadMUS("ketbai.mp3");
+                    Mix_PlayMusic(ketbai, 1);
+                    SDL_Delay(3000);
+                    Mix_CloseAudio();
                     quitSDL(window, renderer);
                     return 0;
                 }
+                nho = 3;
                 snake[0].y = (snake[0].y + step) % SCREEN_HEIGHT; 
                 break;
             case SDLK_UP: 
                 if (update(snake,2, (snake[0].y + SCREEN_HEIGHT - step) % SCREEN_HEIGHT));
                 else {
+                    Mix_Music* ketbai = Mix_LoadMUS("ketbai.mp3");
+                    Mix_PlayMusic(ketbai, 1);
+                    SDL_Delay(3000);
+                    Mix_CloseAudio();
                     quitSDL(window, renderer);
                     return 0;
                 }
+                nho = 4;
                 snake[0].y = (snake[0].y + SCREEN_HEIGHT - step) % SCREEN_HEIGHT; 
                 break;
             default: break;
             }
-            if (snake[0].x == food.x && snake[0].y == food.y) snake.push_back(hcn);
+            if (snake[0].x == food.x && snake[0].y == food.y) {
+                snake.push_back(hcn);
+                if (dem % 2 == 0) Mix_PlayMusic(music, 1);
+                else Mix_PlayMusic(ketngan, 1);
+                dem++;
+            }
             while (snake[0].x==food.x && snake[0].y==food.y) randomfood(food);
             // Xoá toàn bộ màn hình và vẽ lại
             refreshScreen( renderer, snake ,food);
@@ -165,6 +226,7 @@ int main(int argc, char* argv[])
         }
     }
     //waitUntilKeyPressed();
+    Mix_CloseAudio();
     quitSDL(window, renderer);
     return 0;
 }
