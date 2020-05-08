@@ -5,6 +5,7 @@
 #include <vector>
 #include <SDL_mixer.h>
 #include <cstring>
+#include <SDL_image.h>
 
 using namespace std;
 
@@ -74,10 +75,10 @@ void refreshScreen( SDL_Renderer* renderer, const vector <SDL_Rect> snake,const 
     SDL_RenderPresent(renderer);
 }
 void randomfood(SDL_Rect & food) {
-    food.x = (rand() % ((SCREEN_WIDTH - 40)/40))*40;
-    food.y = (rand() % ((SCREEN_HEIGHT - 40)/40))*40;
-    food.w = 40;
-    food.h = 40;
+    food.x = (rand() % ((SCREEN_WIDTH - 20)/20))*20;
+    food.y = (rand() % ((SCREEN_HEIGHT - 20)/20))*20;
+    food.w = 20;
+    food.h = 20;
 }
 bool update(vector <SDL_Rect>& snake, const int td, const int dd) {
     for (int i = snake.size() - 1; i > 0; i--) {
@@ -87,6 +88,7 @@ bool update(vector <SDL_Rect>& snake, const int td, const int dd) {
     }
     return true;
 }
+   
 int main(int argc, char* argv[])
 {
     SDL_Window* window;
@@ -110,46 +112,86 @@ int main(int argc, char* argv[])
     Mix_PlayMusic(modau, 1);
     hcn.x = 0;
     hcn.y = 0;
-    hcn.w = 40;
-    hcn.h = 40;
+    hcn.w = 20;
+    hcn.h = 20;
     snake.push_back(hcn);
-    const int step = 40;
+    const int step = 20;
     SDL_RenderFillRect(renderer, &hcn);
     refreshScreen( renderer, snake, food);
     // Your drawing code here
     // use SDL_RenderPresent(renderer) to show it
     SDL_Event e;
-    int nho = 2, dem = 0,test =0;
+    int nho = 2, dem = 0;
+    SDL_WaitEvent(&e);
     while (true) {
-        SDL_Delay(100);
-        test++;
-        cout << test << endl;
-
+        
         // Nếu không có sự kiện gì thì tiếp tục trở về đầu vòng lặp
         
                     // Nếu sự kiện là kết thúc (như đóng cửa sổ) thì thoát khỏi vòng lặp
-        switch (nho) {
-        case 1:
-            update(snake, 1, (snake[0].x - step + SCREEN_WIDTH) % SCREEN_WIDTH);
-            snake[0].x= (snake[0].x - step + SCREEN_WIDTH) % SCREEN_WIDTH;
-            break;
-        case 2:
-            update(snake, 1, (snake[0].x + step ) % SCREEN_WIDTH);
-            snake[0].x = (snake[0].x + step + SCREEN_WIDTH) % SCREEN_WIDTH;
-            break;
-        case 3:
-            update(snake, 2, (snake[0].y + step + SCREEN_WIDTH) % SCREEN_WIDTH);
-            snake[0].y = (snake[0].y + step + SCREEN_WIDTH) % SCREEN_WIDTH;
-            break;
-        case 4:
-            update(snake, 2, (snake[0].y - step + SCREEN_WIDTH) % SCREEN_WIDTH);
-            snake[0].y = (snake[0].y - step + SCREEN_WIDTH) % SCREEN_WIDTH;
-            break;
-        default: break;
+        //auto(snake, nho);
+        if (SDL_PollEvent(&e) == 0) {
+            SDL_Delay(100);
+            switch (nho) {
+            case 1:
+                if (update(snake, 1, (snake[0].x - step + SCREEN_WIDTH) % SCREEN_WIDTH));
+                else {
+                    Mix_Music* ketbai = Mix_LoadMUS("ketbai.mp3");
+                    Mix_PlayMusic(ketbai, 1);
+                    SDL_Delay(3000);
+                    Mix_CloseAudio();
+                    quitSDL(window, renderer);
+                    return 0;
+                }
+                snake[0].x = (snake[0].x - step + SCREEN_WIDTH) % SCREEN_WIDTH;
+                break;
+            case 2:
+                if (update(snake, 1, (snake[0].x + step) % SCREEN_WIDTH));
+                else {
+                    Mix_Music* ketbai = Mix_LoadMUS("ketbai.mp3");
+                    Mix_PlayMusic(ketbai, 1);
+                    SDL_Delay(3000);
+                    Mix_CloseAudio();
+                    quitSDL(window, renderer);
+                    return 0;
+                }
+                snake[0].x = (snake[0].x + step + SCREEN_WIDTH) % SCREEN_WIDTH;
+                break;
+            case 3:
+                if (update(snake, 2, (snake[0].y + step + SCREEN_HEIGHT) % SCREEN_HEIGHT));
+                else {
+                    Mix_Music* ketbai = Mix_LoadMUS("ketbai.mp3");
+                    Mix_PlayMusic(ketbai, 1);
+                    SDL_Delay(3000);
+                    Mix_CloseAudio();
+                    quitSDL(window, renderer);
+                    return 0;
+                }
+                snake[0].y = (snake[0].y + step + SCREEN_HEIGHT) % SCREEN_HEIGHT;
+                break;
+            case 4:
+                if (update(snake, 2, (snake[0].y - step + SCREEN_HEIGHT) % SCREEN_HEIGHT));
+                else {
+                    Mix_Music* ketbai = Mix_LoadMUS("ketbai.mp3");
+                    Mix_PlayMusic(ketbai, 1);
+                    SDL_Delay(3000);
+                    Mix_CloseAudio();
+                    quitSDL(window, renderer);
+                    return 0;
+                }
+                snake[0].y = (snake[0].y - step + SCREEN_HEIGHT) % SCREEN_HEIGHT;
+                break;
+            default: break;
+            }
+            if (snake[0].x == food.x && snake[0].y == food.y) {
+                snake.push_back(hcn);
+                if (dem % 2 == 0) Mix_PlayMusic(music, 1);
+                else Mix_PlayMusic(ketngan, 1);
+                dem++;
+            }
+            while (snake[0].x == food.x && snake[0].y == food.y) randomfood(food);
+            refreshScreen(renderer, snake, food);
+            continue;
         }
-        refreshScreen(renderer, snake, food);
-        if (SDL_WaitEvent(&e)== 1) continue;
-        cout << "Fuck you " << endl;
         if (e.type == SDL_QUIT) break;
         // Nếu có một phím được nhấn, thì xét phím đó là gì để xử lý tiếp
         hcn = snake[snake.size() - 1];
@@ -158,8 +200,8 @@ int main(int argc, char* argv[])
             case SDLK_ESCAPE: break; // Nếu nhấn phìm ESC thì thoát khỏi vòng lặp
             // Nếu phím mũi tên trái, dịch sang trái 
             // (cộng chiều rộng, trừ bước, rồi lấy phần dư để giá trị luôn dương, và hiệu ứng quay vòng)
-            case SDLK_LEFT: 
-                if (update(snake,1, (snake[0].x + SCREEN_WIDTH - step) % SCREEN_WIDTH));
+            case SDLK_LEFT:
+                if (update(snake, 1, (snake[0].x + SCREEN_WIDTH - step) % SCREEN_WIDTH));
                 else {
                     Mix_Music* ketbai = Mix_LoadMUS("ketbai.mp3");
                     Mix_PlayMusic(ketbai, 1);
@@ -172,8 +214,8 @@ int main(int argc, char* argv[])
                 snake[0].x = (snake[0].x + SCREEN_WIDTH - step) % SCREEN_WIDTH;
                 break;
                 // Tương tự với dịch phải, xuống và lên
-            case SDLK_RIGHT: 
-                if (update(snake,1, (snake[0].x + step) % SCREEN_WIDTH));
+            case SDLK_RIGHT:
+                if (update(snake, 1, (snake[0].x + step) % SCREEN_WIDTH));
                 else {
                     Mix_Music* ketbai = Mix_LoadMUS("ketbai.mp3");
                     Mix_PlayMusic(ketbai, 1);
@@ -183,10 +225,10 @@ int main(int argc, char* argv[])
                     return 0;
                 }
                 nho = 2;
-                snake[0].x = (snake[0].x + step) % SCREEN_WIDTH; 
+                snake[0].x = (snake[0].x + step) % SCREEN_WIDTH;
                 break;
             case SDLK_DOWN:
-                if (update(snake,2, (snake[0].y + step) % SCREEN_HEIGHT));
+                if (update(snake, 2, (snake[0].y + step) % SCREEN_HEIGHT));
                 else {
                     Mix_Music* ketbai = Mix_LoadMUS("ketbai.mp3");
                     Mix_PlayMusic(ketbai, 1);
@@ -196,10 +238,10 @@ int main(int argc, char* argv[])
                     return 0;
                 }
                 nho = 3;
-                snake[0].y = (snake[0].y + step) % SCREEN_HEIGHT; 
+                snake[0].y = (snake[0].y + step) % SCREEN_HEIGHT;
                 break;
-            case SDLK_UP: 
-                if (update(snake,2, (snake[0].y + SCREEN_HEIGHT - step) % SCREEN_HEIGHT));
+            case SDLK_UP:
+                if (update(snake, 2, (snake[0].y + SCREEN_HEIGHT - step) % SCREEN_HEIGHT));
                 else {
                     Mix_Music* ketbai = Mix_LoadMUS("ketbai.mp3");
                     Mix_PlayMusic(ketbai, 1);
@@ -209,7 +251,7 @@ int main(int argc, char* argv[])
                     return 0;
                 }
                 nho = 4;
-                snake[0].y = (snake[0].y + SCREEN_HEIGHT - step) % SCREEN_HEIGHT; 
+                snake[0].y = (snake[0].y + SCREEN_HEIGHT - step) % SCREEN_HEIGHT;
                 break;
             default: break;
             }
@@ -219,11 +261,12 @@ int main(int argc, char* argv[])
                 else Mix_PlayMusic(ketngan, 1);
                 dem++;
             }
-            while (snake[0].x==food.x && snake[0].y==food.y) randomfood(food);
+            while (snake[0].x == food.x && snake[0].y == food.y) randomfood(food);
             // Xoá toàn bộ màn hình và vẽ lại
-            refreshScreen( renderer, snake ,food);
-
+            refreshScreen(renderer, snake, food);
         }
+        
+        
     }
     //waitUntilKeyPressed();
     Mix_CloseAudio();
