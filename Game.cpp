@@ -45,6 +45,10 @@ void initSDL(SDL_Window*& window, SDL_Renderer*& renderer)
 
 void quitSDL(SDL_Window* window, SDL_Renderer* renderer)
 {
+    Mix_Music* ketbai = Mix_LoadMUS("ketbai.mp3");
+    Mix_PlayMusic(ketbai, 1);
+    SDL_Delay(3000);
+    Mix_CloseAudio();
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
@@ -110,8 +114,13 @@ int main(int argc, char* argv[])
     modau = Mix_LoadMUS("modau.mp3");
     music = Mix_LoadMUS("music.mp3");
     Mix_PlayMusic(modau, 1);
-    hcn.x = 0;
-    hcn.y = 0;
+    hcn.x = 760;
+    hcn.y = 380;
+    hcn.w = 20;
+    hcn.h = 20;
+    snake.push_back(hcn);
+    hcn.x = 740;
+    hcn.y = 380;
     hcn.w = 20;
     hcn.h = 20;
     snake.push_back(hcn);
@@ -135,10 +144,6 @@ int main(int argc, char* argv[])
             case 1:
                 if (update(snake, 1, (snake[0].x - step + SCREEN_WIDTH) % SCREEN_WIDTH));
                 else {
-                    Mix_Music* ketbai = Mix_LoadMUS("ketbai.mp3");
-                    Mix_PlayMusic(ketbai, 1);
-                    SDL_Delay(3000);
-                    Mix_CloseAudio();
                     quitSDL(window, renderer);
                     return 0;
                 }
@@ -147,10 +152,6 @@ int main(int argc, char* argv[])
             case 2:
                 if (update(snake, 1, (snake[0].x + step) % SCREEN_WIDTH));
                 else {
-                    Mix_Music* ketbai = Mix_LoadMUS("ketbai.mp3");
-                    Mix_PlayMusic(ketbai, 1);
-                    SDL_Delay(3000);
-                    Mix_CloseAudio();
                     quitSDL(window, renderer);
                     return 0;
                 }
@@ -159,10 +160,6 @@ int main(int argc, char* argv[])
             case 3:
                 if (update(snake, 2, (snake[0].y + step + SCREEN_HEIGHT) % SCREEN_HEIGHT));
                 else {
-                    Mix_Music* ketbai = Mix_LoadMUS("ketbai.mp3");
-                    Mix_PlayMusic(ketbai, 1);
-                    SDL_Delay(3000);
-                    Mix_CloseAudio();
                     quitSDL(window, renderer);
                     return 0;
                 }
@@ -171,10 +168,6 @@ int main(int argc, char* argv[])
             case 4:
                 if (update(snake, 2, (snake[0].y - step + SCREEN_HEIGHT) % SCREEN_HEIGHT));
                 else {
-                    Mix_Music* ketbai = Mix_LoadMUS("ketbai.mp3");
-                    Mix_PlayMusic(ketbai, 1);
-                    SDL_Delay(3000);
-                    Mix_CloseAudio();
                     quitSDL(window, renderer);
                     return 0;
                 }
@@ -203,10 +196,6 @@ int main(int argc, char* argv[])
             case SDLK_LEFT:
                 if (update(snake, 1, (snake[0].x + SCREEN_WIDTH - step) % SCREEN_WIDTH));
                 else {
-                    Mix_Music* ketbai = Mix_LoadMUS("ketbai.mp3");
-                    Mix_PlayMusic(ketbai, 1);
-                    SDL_Delay(3000);
-                    Mix_CloseAudio();
                     quitSDL(window, renderer);
                     return 0;
                 }
@@ -217,10 +206,6 @@ int main(int argc, char* argv[])
             case SDLK_RIGHT:
                 if (update(snake, 1, (snake[0].x + step) % SCREEN_WIDTH));
                 else {
-                    Mix_Music* ketbai = Mix_LoadMUS("ketbai.mp3");
-                    Mix_PlayMusic(ketbai, 1);
-                    SDL_Delay(3000);
-                    Mix_CloseAudio();
                     quitSDL(window, renderer);
                     return 0;
                 }
@@ -230,10 +215,6 @@ int main(int argc, char* argv[])
             case SDLK_DOWN:
                 if (update(snake, 2, (snake[0].y + step) % SCREEN_HEIGHT));
                 else {
-                    Mix_Music* ketbai = Mix_LoadMUS("ketbai.mp3");
-                    Mix_PlayMusic(ketbai, 1);
-                    SDL_Delay(3000);
-                    Mix_CloseAudio();
                     quitSDL(window, renderer);
                     return 0;
                 }
@@ -243,10 +224,6 @@ int main(int argc, char* argv[])
             case SDLK_UP:
                 if (update(snake, 2, (snake[0].y + SCREEN_HEIGHT - step) % SCREEN_HEIGHT));
                 else {
-                    Mix_Music* ketbai = Mix_LoadMUS("ketbai.mp3");
-                    Mix_PlayMusic(ketbai, 1);
-                    SDL_Delay(3000);
-                    Mix_CloseAudio();
                     quitSDL(window, renderer);
                     return 0;
                 }
