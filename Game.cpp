@@ -6,6 +6,7 @@
 #include <SDL_mixer.h>
 #include <cstring>
 #include <SDL_image.h>
+#include <SDL_ttf.h>
 
 using namespace std;
 
@@ -105,7 +106,7 @@ int main(int argc, char* argv[])
     SDL_Renderer* renderer;
     initSDL(window, renderer);
     SDL_SetRenderDrawColor(renderer, 0, 0, 255, 0);
-    srand(time(NULL));
+    srand((unsigned int)time(NULL));
     SDL_Rect food,hcn;
     randomfood(food);
     vector <SDL_Rect> snake;
@@ -139,12 +140,8 @@ int main(int argc, char* argv[])
     int nho = 2, dem = 0;
     SDL_WaitEvent(&e);
     while (true) {
-        
-        // Nếu không có sự kiện gì thì tiếp tục trở về đầu vòng lặp
-        
-                    // Nếu sự kiện là kết thúc (như đóng cửa sổ) thì thoát khỏi vòng lặp
-        //auto(snake, nho);
-        if (SDL_PollEvent(&e) == 0) {
+        hcn = snake[snake.size() - 1];
+        if (SDL_PollEvent(&e) == 0 ) {
             SDL_Delay(100);
             switch (nho) {
             case 1:
@@ -193,7 +190,7 @@ int main(int argc, char* argv[])
         }
         if (e.type == SDL_QUIT) break;
         // Nếu có một phím được nhấn, thì xét phím đó là gì để xử lý tiếp
-        hcn = snake[snake.size() - 1];
+        
         if (e.type == SDL_KEYDOWN) {
             switch (e.key.keysym.sym) {
             case SDLK_ESCAPE: break; // Nếu nhấn phìm ESC thì thoát khỏi vòng lặp
@@ -248,9 +245,14 @@ int main(int argc, char* argv[])
             // Xoá toàn bộ màn hình và vẽ lại
             refreshScreen(renderer, snake, food);
         }
-        
-        
+
+
     }
+        // Nếu không có sự kiện gì thì tiếp tục trở về đầu vòng lặp
+        
+                    // Nếu sự kiện là kết thúc (như đóng cửa sổ) thì thoát khỏi vòng lặp
+        //auto(snake, nho);
+       
     //waitUntilKeyPressed();
     Mix_CloseAudio();
     quitSDL(window, renderer);
