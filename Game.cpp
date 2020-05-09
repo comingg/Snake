@@ -11,8 +11,7 @@ using namespace std;
 
 const int SCREEN_WIDTH = 1520;
 const int SCREEN_HEIGHT = 760;
-const string WINDOW_TITLE = "Snakerman";
-
+const string WINDOW_TITLE = "Snaker";
 void logSDLError(std::ostream& os,
     const std::string& msg, bool fatal)
 {
@@ -45,10 +44,17 @@ void initSDL(SDL_Window*& window, SDL_Renderer*& renderer)
 
 void quitSDL(SDL_Window* window, SDL_Renderer* renderer)
 {
+    SDL_Surface* screen = NULL, *background=NULL;
+    background = IMG_Load("rip.png");
+    screen = SDL_GetWindowSurface(window);
+    SDL_BlitSurface(background, NULL, screen, NULL);
+    SDL_UpdateWindowSurface(window);
     Mix_Music* ketbai = Mix_LoadMUS("ketbai.mp3");
     Mix_PlayMusic(ketbai, 1);
-    SDL_Delay(3000);
+    SDL_Delay(5000);
     Mix_CloseAudio();
+    SDL_FreeSurface(background);
+    SDL_FreeSurface(screen);
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
