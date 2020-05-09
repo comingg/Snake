@@ -7,12 +7,13 @@
 #include <cstring>
 #include <SDL_image.h>
 #include <SDL_ttf.h>
+#include <sstream>
 
 using namespace std;
 
 const int SCREEN_WIDTH = 1520;
 const int SCREEN_HEIGHT = 760;
-const string WINDOW_TITLE = "Snaker";
+const string WINDOW_TITLE = "Sneaker";
 void logSDLError(std::ostream& os,
     const std::string& msg, bool fatal)
 {
@@ -34,7 +35,6 @@ void initSDL(SDL_Window*& window, SDL_Renderer*& renderer)
     if (window == nullptr) logSDLError(std::cout, "CreateWindow", true);
 
 
-    //Khi thông thường chạy với môi trường bình thường ở nhà
     renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED |
         SDL_RENDERER_PRESENTVSYNC);
     if (renderer == nullptr) logSDLError(std::cout, "CreateRenderer", true);
@@ -45,17 +45,19 @@ void initSDL(SDL_Window*& window, SDL_Renderer*& renderer)
 
 void quitSDL(SDL_Window* window, SDL_Renderer* renderer)
 {
+    Mix_Music* ketbai = Mix_LoadMUS("ketbai.mp3");
+    Mix_PlayMusic(ketbai, 1);
+    SDL_Delay(4500);
+    Mix_CloseAudio();
     SDL_Surface* screen = NULL, *background=NULL;
     background = IMG_Load("rip.png");
     screen = SDL_GetWindowSurface(window);
     SDL_BlitSurface(background, NULL, screen, NULL);
     SDL_UpdateWindowSurface(window);
-    Mix_Music* ketbai = Mix_LoadMUS("ketbai.mp3");
-    Mix_PlayMusic(ketbai, 1);
-    SDL_Delay(5000);
-    Mix_CloseAudio();
+    SDL_Delay(2000);
     SDL_FreeSurface(background);
     SDL_FreeSurface(screen);
+    TTF_Quit();
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
     SDL_Quit();
@@ -65,16 +67,40 @@ void waitUntilKeyPressed()
     SDL_Event e;
     while (true) {
         if (SDL_WaitEvent(&e) != 0 &&
-            (e.type == SDL_KEYDOWN || e.type == SDL_QUIT))
+            (e.type == SDL_KEYDOWN ))
             return;
-        SDL_Delay(200);
+        //SDL_Delay(200);
     }
 }
-void refreshScreen( SDL_Renderer* renderer, const vector <SDL_Rect> snake,const SDL_Rect &food)
+void vescore(SDL_Renderer* renderer, int x) {
+    TTF_Font* font = NULL;
+    font = TTF_OpenFont("fontchu.ttf", 30);
+    SDL_Color mau = { 110, 195, 201 };
+    string text = "Score : ";
+    string s = to_string(x);
+    text = text + s;
+    SDL_Surface* surface = TTF_RenderText_Solid(font, text.c_str(), mau);
+    SDL_Texture* texture = SDL_CreateTextureFromSurface(renderer, surface);
+    SDL_FreeSurface(surface);
+    SDL_Rect srcRest;
+    SDL_Rect desRect;
+    TTF_SizeText(font, text.c_str(), &srcRest.w, &srcRest.h);
+
+    srcRest.x = 0;
+    srcRest.y = 0;
+
+    desRect.x = 0;
+    desRect.y = 0;
+
+    desRect.w = srcRest.w;
+    desRect.h = srcRest.h;
+    SDL_RenderCopy(renderer, texture, &srcRest, &desRect);
+}
+void refreshScreen( SDL_Renderer* renderer, const vector <SDL_Rect> snake,const SDL_Rect &food,int x)
 {
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
-    SDL_SetRenderDrawColor(renderer, 0, 255, 0, 255);
+    SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
     SDL_RenderFillRect(renderer, &snake[0]);
     SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
     for (int i = 1; i < snake.size(); i++)
@@ -83,6 +109,7 @@ void refreshScreen( SDL_Renderer* renderer, const vector <SDL_Rect> snake,const 
     }
     SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
     SDL_RenderFillRect(renderer, &food);
+    vescore(renderer, x);
     SDL_RenderPresent(renderer);
 }
 void randomfood(SDL_Rect & food) {
@@ -105,11 +132,21 @@ int main(int argc, char* argv[])
     SDL_Window* window;
     SDL_Renderer* renderer;
     initSDL(window, renderer);
+    SDL_Surface* screen = NULL, * background = NULL;
+    background = IMG_Load("pressme.png");
+    screen = SDL_GetWindowSurface(window);
+    SDL_BlitSurface(background, NULL, screen, NULL);
+    SDL_UpdateWindowSurface(window);
+    waitUntilKeyPressed();
     SDL_SetRenderDrawColor(renderer, 0, 0, 255, 0);
     srand((unsigned int)time(NULL));
     SDL_Rect food,hcn;
     randomfood(food);
     vector <SDL_Rect> snake;
+    if (TTF_Init() < 0)
+    {
+        return -1;
+    }
     if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 2048) == -1)
     {
         cout << "Error";
@@ -120,7 +157,6 @@ int main(int argc, char* argv[])
     ketngan = Mix_LoadMUS("ketngan.mp3");
     modau = Mix_LoadMUS("modau.mp3");
     music = Mix_LoadMUS("music.mp3");
-    Mix_PlayMusic(modau, 1);
     hcn.x = 760;
     hcn.y = 380;
     hcn.w = 20;
@@ -133,11 +169,10 @@ int main(int argc, char* argv[])
     snake.push_back(hcn);
     const int step = 20;
     SDL_RenderFillRect(renderer, &hcn);
-    refreshScreen( renderer, snake, food);
-    // Your drawing code here
-    // use SDL_RenderPresent(renderer) to show it
-    SDL_Event e;
+    Mix_PlayMusic(modau, 1);
     int nho = 2, dem = 0;
+    refreshScreen( renderer, snake, food,dem);
+    SDL_Event e;
     SDL_WaitEvent(&e);
     while (true) {
         hcn = snake[snake.size() - 1];
@@ -183,19 +218,17 @@ int main(int argc, char* argv[])
                 if (dem % 2 == 0) Mix_PlayMusic(music, 1);
                 else Mix_PlayMusic(ketngan, 1);
                 dem++;
+                vescore(renderer, dem);
             }
             while (snake[0].x == food.x && snake[0].y == food.y) randomfood(food);
-            refreshScreen(renderer, snake, food);
+            refreshScreen(renderer, snake, food,dem);
             continue;
         }
         if (e.type == SDL_QUIT) break;
-        // Nếu có một phím được nhấn, thì xét phím đó là gì để xử lý tiếp
         
         if (e.type == SDL_KEYDOWN) {
             switch (e.key.keysym.sym) {
-            case SDLK_ESCAPE: break; // Nếu nhấn phìm ESC thì thoát khỏi vòng lặp
-            // Nếu phím mũi tên trái, dịch sang trái 
-            // (cộng chiều rộng, trừ bước, rồi lấy phần dư để giá trị luôn dương, và hiệu ứng quay vòng)
+            case SDLK_ESCAPE: break; 
             case SDLK_LEFT:
                 if (update(snake, 1, (snake[0].x + SCREEN_WIDTH - step) % SCREEN_WIDTH));
                 else {
@@ -205,7 +238,6 @@ int main(int argc, char* argv[])
                 nho = 1;
                 snake[0].x = (snake[0].x + SCREEN_WIDTH - step) % SCREEN_WIDTH;
                 break;
-                // Tương tự với dịch phải, xuống và lên
             case SDLK_RIGHT:
                 if (update(snake, 1, (snake[0].x + step) % SCREEN_WIDTH));
                 else {
@@ -240,22 +272,21 @@ int main(int argc, char* argv[])
                 if (dem % 2 == 0) Mix_PlayMusic(music, 1);
                 else Mix_PlayMusic(ketngan, 1);
                 dem++;
+                vescore(renderer, dem);
             }
             while (snake[0].x == food.x && snake[0].y == food.y) randomfood(food);
-            // Xoá toàn bộ màn hình và vẽ lại
-            refreshScreen(renderer, snake, food);
+            refreshScreen(renderer, snake, food,dem);
         }
 
 
     }
-        // Nếu không có sự kiện gì thì tiếp tục trở về đầu vòng lặp
-        
-                    // Nếu sự kiện là kết thúc (như đóng cửa sổ) thì thoát khỏi vòng lặp
-        //auto(snake, nho);
-       
-    //waitUntilKeyPressed();
     Mix_CloseAudio();
-    quitSDL(window, renderer);
+    SDL_FreeSurface(background);
+    SDL_FreeSurface(screen);
+    TTF_Quit();
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
+    SDL_Quit();
     return 0;
 }
 
