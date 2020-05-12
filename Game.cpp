@@ -11,6 +11,8 @@
 
 using namespace std;
 
+int tg = 0;
+bool ok = true, ok2 = true;
 const int SCREEN_WIDTH = 1520;
 const int SCREEN_HEIGHT = 760;
 const string WINDOW_TITLE = "Sneaker";
@@ -96,7 +98,19 @@ void vescore(SDL_Renderer* renderer, int x) {
     desRect.h = srcRest.h;
     SDL_RenderCopy(renderer, texture, &srcRest, &desRect);
 }
-void refreshScreen( SDL_Renderer* renderer, const vector <SDL_Rect> snake,const SDL_Rect &food,int x)
+void randomfood(SDL_Rect & food) {
+    food.x = (rand() % ((SCREEN_WIDTH - 20)/20))*20;
+    food.y = (rand() % ((SCREEN_HEIGHT - 20)/20))*20;
+    food.w = 20;
+    food.h = 20;
+}
+void randompowfood(SDL_Rect& food) {
+    food.x = (rand() % ((SCREEN_WIDTH - 40) / 40)) * 40;
+    food.y = (rand() % ((SCREEN_HEIGHT - 40) / 40)) * 40;
+    food.w = 40;
+    food.h = 40;
+}
+void refreshScreen( SDL_Renderer* renderer, const vector <SDL_Rect> snake,const SDL_Rect &food,int x, SDL_Rect & pow)
 {
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
@@ -109,15 +123,24 @@ void refreshScreen( SDL_Renderer* renderer, const vector <SDL_Rect> snake,const 
     }
     SDL_SetRenderDrawColor(renderer, 0, 0, 255, 255);
     SDL_RenderFillRect(renderer, &food);
+    if ( x>0 && x % 5 == 0 && ok) {
+        randompowfood(pow);
+        while (snake[0].x == pow.x && snake[0].y == pow.y) randompowfood(pow);
+        tg = SDL_GetTicks();
+        ok = false;
+        ok2 = true;
+    }
+    if (x % 5 != 0) ok = true;
+    int oke = SDL_GetTicks();
+    if (oke - tg <= 5000 && ok2) {
+        SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
+        SDL_RenderFillRect(renderer, &pow);
+    }
+    else ok2 = false;
     vescore(renderer, x);
     SDL_RenderPresent(renderer);
 }
-void randomfood(SDL_Rect & food) {
-    food.x = (rand() % ((SCREEN_WIDTH - 20)/20))*20;
-    food.y = (rand() % ((SCREEN_HEIGHT - 20)/20))*20;
-    food.w = 20;
-    food.h = 20;
-}
+
 bool update(vector <SDL_Rect>& snake, const int td, const int dd) {
     for (int i = snake.size() - 1; i > 0; i--) {
         if (td == 1 && snake[i].x == dd && snake[i].y == snake[0].y) return false;
@@ -140,7 +163,7 @@ int main(int argc, char* argv[])
     waitUntilKeyPressed();
     SDL_SetRenderDrawColor(renderer, 0, 0, 255, 0);
     srand((unsigned int)time(NULL));
-    SDL_Rect food,hcn;
+    SDL_Rect food,hcn,pow,hcn2;
     randomfood(food);
     vector <SDL_Rect> snake;
     if (TTF_Init() < 0)
@@ -171,13 +194,11 @@ int main(int argc, char* argv[])
     SDL_RenderFillRect(renderer, &hcn);
     Mix_PlayMusic(modau, 1);
     int nho = 2, dem = 0;
-    refreshScreen( renderer, snake, food,dem);
+    refreshScreen( renderer, snake, food,dem,pow);
     SDL_Event e;
-    SDL_WaitEvent(&e);
     while (true) {
         hcn = snake[snake.size() - 1];
         if (SDL_PollEvent(&e) == 0 ) {
-            SDL_Delay(100);
             switch (nho) {
             case 1:
                 if (update(snake, 1, (snake[0].x - step + SCREEN_WIDTH) % SCREEN_WIDTH));
@@ -220,8 +241,17 @@ int main(int argc, char* argv[])
                 dem++;
                 vescore(renderer, dem);
             }
+            if ((snake[0].x==pow.x && snake[0].y==pow.y) || (snake[0].x == pow.x+20 && snake[0].y == pow.y) || (snake[0].x == pow.x && snake[0].y == pow.y+20) || (snake[0].x == pow.x+20 && snake[0].y == pow.y+20)) {
+                ok2 = false;
+                ok = true;
+                if (dem % 2 == 0) Mix_PlayMusic(music, 1);
+                else Mix_PlayMusic(ketngan, 1);
+                dem++;
+                //dem++;
+                vescore(renderer, dem);
+            }
             while (snake[0].x == food.x && snake[0].y == food.y) randomfood(food);
-            refreshScreen(renderer, snake, food,dem);
+            refreshScreen(renderer, snake, food,dem,pow);
             continue;
         }
         if (e.type == SDL_QUIT) break;
@@ -274,8 +304,17 @@ int main(int argc, char* argv[])
                 dem++;
                 vescore(renderer, dem);
             }
+            if ((snake[0].x == pow.x && snake[0].y == pow.y) || (snake[0].x == pow.x + 20 && snake[0].y == pow.y) || (snake[0].x == pow.x && snake[0].y == pow.y + 20) || (snake[0].x == pow.x + 20 && snake[0].y == pow.y + 20)) {
+                ok2 = false;
+                ok = true;
+                if (dem % 2 == 0) Mix_PlayMusic(music, 1);
+                else Mix_PlayMusic(ketngan, 1);
+                dem++;
+                //dem++;
+                vescore(renderer, dem);
+            }
             while (snake[0].x == food.x && snake[0].y == food.y) randomfood(food);
-            refreshScreen(renderer, snake, food,dem);
+            refreshScreen(renderer, snake, food,dem,pow);
         }
 
 
@@ -289,5 +328,6 @@ int main(int argc, char* argv[])
     SDL_Quit();
     return 0;
 }
+
 
 
